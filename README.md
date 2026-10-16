@@ -55,6 +55,15 @@ Group results, logistic regression (mean over 10 test splits):
 | personal status female (n≈74) | 0.316 | 0.566 | 0.364 | 0.512 |
 | personal status male (n≈176) | 0.414 | 0.484 | 0.384 | 0.515 |
 
+Share of good applicants in each group, raw data (`base_rates.py`):
+
+| Group | n | Share good |
+|---|---|---|
+| age 25 and over | 851 | 0.719 |
+| age under 25 | 149 | 0.591 |
+| personal status female | 310 | 0.648 |
+| personal status male | 690 | 0.723 |
+
 ## Findings and limitations
 
 _Draft: check each statement against `results/` and rewrite in your own words._
@@ -64,12 +73,15 @@ _Draft: check each statement against `results/` and rewrite in your own words._
 - Every model beats the trivial policies. Cost per applicant is about 0.52 to 0.55, against 0.70 for rejecting everyone and 1.50 for approving everyone.
 - Age gap: under-25 applicants are approved about half as often as applicants 25 and over (0.25 vs 0.41 for logistic regression), and a good applicant under 25 is rejected about 65% of the time versus about 49%. Removing the age column left the logistic regression gap essentially unchanged, and only partly narrowed it for gradient boosting and the MLP. This is consistent with other columns acting as proxies for age.
 - Personal-status gap: women's approval rate was lower with the column present (0.32 vs 0.41) and the gap shrank to about 0.02 once it was removed. This is consistent with the model using the column directly rather than through proxies.
+- Base rates: under-25 applicants really do have a lower share of good outcomes in this data (0.59 vs 0.72), and women a lower share than men (0.65 vs 0.72). That explains part of the approval-rate gaps, but not all of them: the supervised model approves under-25 applicants at 0.60 times the rate of older applicants (0.25 vs 0.41), against a base-rate ratio of 0.82, and it rejects 65% of good under-25 applicants versus 48% of good applicants 25 and over. Among truly good applicants, young ones are treated worse. Because base rates differ, the common fairness criteria (equal approval rates, equal error rates) cannot all hold at once, so any claim of fairness must say which one it uses.
+- RL MLP agent: it approved far more applicants (0.54) and far more bad ones (26% of bad applicants), costing 0.637 against 0.553 for the supervised model. Its group gaps persisted (approval 0.37 for under 25 vs 0.57 for 25 and over), and the gap in good applicants rejected was larger than for the supervised model (0.52 vs 0.32).
+- RL fairness (linear agent, which was trained with the sensitive columns as features): it was more conservative for everyone, and the group gaps stayed. Under-25 applicants were approved 0.16 of the time vs 0.30 for 25 and over (supervised: 0.25 vs 0.41), and good under-25 applicants were rejected 77% of the time vs 61%. The agent matched the supervised cost by rejecting more good applicants overall and approving fewer bad ones, not by treating groups more evenly.
 - RL: the linear agent matched the supervised model on cost (0.545 vs 0.553, difference far smaller than the spread across repeats) while approving fewer applicants and approving fewer bad ones (7% vs 13%). The MLP agent was worse and unstable (0.637 ± 0.091) and barely beat rejecting everyone.
 
 **Limitations**
 - Small data: 1,000 rows and test splits of 250. The under-25 group has about 38 test applicants per split, and the non-foreign-worker group about 10, so foreign-worker results are too noisy to interpret and are not reported above.
 - The "female" group is derived from the dataset's personal-status field, which mixes sex and marital status; it only covers women who are divorced, separated, or married.
-- Group gaps were not compared against group base rates in the raw data (run `base_rates.py`); a gap in approvals does not by itself show unfairness, or that it is justified.
+- Base rates differ by group, and this project does not decide which fairness criterion is the right one. A gap in approvals does not by itself show unfairness, nor that it is justified.
 - The group tables are averages over overlapping test splits and carry no confidence intervals.
 - The RL agents were not hyperparameter-tuned (learning rate, epochs, exploration), so the MLP agent's result may reflect that, not a limit of RL.
 - The label is credit risk from a 1990s German dataset, not current lending outcomes, and rejected applicants' outcomes are never observed (selection bias).
