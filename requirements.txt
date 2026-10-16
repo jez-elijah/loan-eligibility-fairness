@@ -1,0 +1,5 @@
+scikit-learn
+pandas
+numpy
+matplotlib
+torch   # optional: only needed for the PyTorch MLP
