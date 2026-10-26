@@ -66,8 +66,6 @@ Share of good applicants in each group, raw data (`base_rates.py`):
 
 ## Findings and limitations
 
-_Draft: check each statement against `results/` and rewrite in your own words._
-
 **Findings**
 - The three supervised models are statistically indistinguishable: AUC 0.78 to 0.79 with a standard deviation of about 0.03 across repeats. The PyTorch MLP's slightly better mean is well within that noise, so the data do not support ranking the models.
 - Every model beats the trivial policies. Cost per applicant is about 0.52 to 0.55, against 0.70 for rejecting everyone and 1.50 for approving everyone.
