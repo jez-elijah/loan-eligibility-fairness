@@ -11,7 +11,7 @@ Baselines on the same test split: supervised logistic regression + cost-optimal 
 (from loan_eligibility.py), approve-all, reject-all.
 
 Usage:  python rl_lending_policy.py [--csv file.csv --target class] [--agent mlp]
-Writes results/rl_policy_results.csv
+Writes results/rl_policy_results_<agent>.csv and rl_fairness_results_<agent>.csv
 """
 import argparse
 import numpy as np, pandas as pd
@@ -106,9 +106,9 @@ def run(args):
                     fair.append(dict(rep=rep, policy=name, attribute=g, group=grp, n=m.sum(), approval_rate=approve[m].mean(),
                                      good_rejected_rate=(~approve[m] & good).sum() / max(good.sum(), 1),
                                      bad_approved_rate=(approve[m] & bad).sum() / max(bad.sum(), 1)))
-    res = pd.DataFrame(rows); res.to_csv("results/rl_policy_results.csv", index=False)
+    res = pd.DataFrame(rows); res.to_csv(f"results/rl_policy_results_{args.agent}.csv", index=False)
     print(res.groupby("policy")[["cost_per_applicant", "approval_rate", "bad_approved_rate"]].agg(["mean", "std"]).round(3))
-    fr = pd.DataFrame(fair); fr.to_csv("results/rl_fairness_results.csv", index=False)
+    fr = pd.DataFrame(fair); fr.to_csv(f"results/rl_fairness_results_{args.agent}.csv", index=False)
     fr = fr[~fr.policy.isin(["approve_all", "reject_all"])]
     print(fr.groupby(["policy", "attribute", "group"])[["n", "approval_rate", "good_rejected_rate", "bad_approved_rate"]].mean().round(3))
 
